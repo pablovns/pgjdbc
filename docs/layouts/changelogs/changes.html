@@ -1,0 +1,26 @@
+{{ define "main" }}
+<article class="container flow">
+    <h1>Release history before 42.0.0</h1>
+    <p>These historical release notes are provided for reference; these versions are no longer supported. The notes are restored from <a href="https://github.com/pgjdbc/pgjdbc/blob/f4b8a0ab5eff42c3ec1a64dff9c38b413e375eac/docs/documentation/changelog.md">the original changelog before the 2022 site migration</a>.</p>
+    {{ $start := "<a name=\"version_9.4.1212\"></a>" }}
+    {{ $parts := split .RawContent $start }}
+    {{ if lt (len $parts) 2 }}
+        {{ errorf "Historical changelog is missing the 9.4.1212 start anchor" }}
+    {{ else }}
+        {{ $history := printf "%s%s" $start (index $parts 1) }}
+        {{ $history = index (split $history "<a name=\"all-committers\"></a>") 0 }}
+        {{ range slice "add" "fix" "remove" "update" }}
+            {{ $history = replaceRE (printf `!\[%s\]\(\.\./media/img/%s\.jpg\)` . .) (printf "**%s:**" (. | title)) $history }}
+            {{ $history = replaceRE (printf `<img\s+alt="%s"\s+src="\.\./media/img/%s\.jpg"\s*/>` . .) (printf "**%s:**" (. | title)) $history }}
+        {{ end }}
+        <h2>Releases in this archive</h2>
+        <ul>
+            {{ range findRE `<a name="version_[0-9A-Za-z._-]+"></a>` $history }}
+                {{ $version := replaceRE `<a name="version_([0-9A-Za-z._-]+)"></a>` "$1" . }}
+                <li><a href="#version_{{ $version }}">Version {{ $version }}</a></li>
+            {{ end }}
+        </ul>
+        {{ $history | markdownify }}
+    {{ end }}
+</article>
+{{ end }}

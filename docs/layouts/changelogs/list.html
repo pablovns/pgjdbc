@@ -5,10 +5,23 @@
         {{ .Title }}
     </h1>
     {{ range .Data.Pages.ByDate.Reverse }}
+    {{ if ne .File.BaseFileName "pre-42-release-history" }}
     <ul>
         <li>
             <a href="{{.Permalink}}"> {{.Params.Version}}</a>
         </li>
+    </ul>
+    {{ end }}
+    {{ end }}
+    {{ with .Site.GetPage "/changelogs/pre-42-release-history" }}
+    <h2>Releases before 42.0.0</h2>
+    <p>These historical releases are no longer supported; their release notes are retained for reference.</p>
+    {{ $archiveURL := .RelPermalink }}
+    <ul>
+        {{ range findRE `<a name="version_[0-9A-Za-z._-]+"></a>` .RawContent }}
+        {{ $version := replaceRE `<a name="version_([0-9A-Za-z._-]+)"></a>` "$1" . }}
+        <li><a href="{{ printf "%s#version_%s" $archiveURL $version }}">Version {{ $version }}</a></li>
+        {{ end }}
     </ul>
     {{ end }}
 </article>
